@@ -2,12 +2,15 @@ using UnityEngine;
 
 public class PersonagemAtv : MonoBehaviour
 {
-    public float velo = 100f;
-    float velomax = 10f;
-    float forcaPulo = 10f;
+    public float velo = 100;
+    float velomax = 5;
+    public float forcaPulo = 10;
     int totalMoeda = 0;
     bool podePular = true;
+    bool estaOlhandoDireita = true;
     Vector3 posInicial;
+    public Transform projetil;
+    public Transform inimigo;
 
     Rigidbody2D rigib;
 
@@ -17,12 +20,48 @@ public class PersonagemAtv : MonoBehaviour
         rigib = GetComponent<Rigidbody2D>();     
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.RightShift) == true)
+        {
+            Transform instanciado = Instantiate(projetil);
+            instanciado.position = transform.position;
+            instanciado.GetComponent<Projetil>().enabled = true;
+
+            Transform instancia = Instantiate(inimigo);
+            instancia.position = transform.position;
+            instancia.GetComponent<SpriteRenderer>().enabled = false;
+
+            if (estaOlhandoDireita == true)
+            {
+                instanciado.GetComponent<Projetil>().direcao = new Vector2(1, 0);
+            }
+            else
+            {
+                instanciado.GetComponent<Projetil>().direcao = new Vector2(-1, 0);
+            }
+        }
+    }
     void FixedUpdate()
     {
         float move = Input.GetAxisRaw("Horizontal");
-        bool pulo = Input.GetAxisRaw("Jump") > 0;
+
+        if (move == 1)
+        {
+            transform.eulerAngles = new Vector2(0, 0);
+            estaOlhandoDireita = true;
+        }
+        if (move == -1)
+        {  
+            transform.eulerAngles = new Vector2(0, 180);
+            estaOlhandoDireita = false;
+        }
 
         rigib.AddForce(new Vector2(move * velo, 0));
+
+        move = move * velo *Time.deltaTime;
+
+        bool pulo = Input.GetAxisRaw("Jump") > 0;
 
         rigib.linearVelocityX = Mathf.Clamp(rigib.linearVelocityX, -velomax, velomax);
 
@@ -35,6 +74,14 @@ public class PersonagemAtv : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
+
+        if (collision.gameObject.name.Contains("Inimigo") == true)
+        {
+            Destroy(collision.gameObject);
+            totalMoeda++;
+            Debug.Log("Moedas Coletadas: " + totalMoeda);
+        }
+
         if (collision.gameObject.name.Contains("Moeda") == true) 
         {
             Destroy(collision.gameObject);
