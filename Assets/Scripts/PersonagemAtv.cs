@@ -1,23 +1,33 @@
+using TMPro;
 using UnityEngine;
 
 public class PersonagemAtv : MonoBehaviour
 {
+    TextMeshProUGUI textoMoedas;
+    TextMeshProUGUI textoVidas;
+
     public float velo = 100;
     float velomax = 5;
     public float forcaPulo = 10;
     int totalMoeda = 0;
+    int vidas = 3;
     bool podePular = true;
     bool estaOlhandoDireita = true;
     Vector3 posInicial;
-    public Transform projetil;
-    public Transform inimigo;
+    Transform projetil;
+    Transform inimigo;
 
     Rigidbody2D rigib;
 
     void Start()
     {
         posInicial = transform.position;
-        rigib = GetComponent<Rigidbody2D>();     
+        rigib = GetComponent<Rigidbody2D>();
+
+        textoMoedas = GameObject.Find("Text (TMP)").transform.GetComponent<TextMeshProUGUI>();
+        textoVidas = GameObject.Find("Vidas").transform.GetComponent<TextMeshProUGUI>();
+        projetil = GameObject.Find("bala").transform;
+        inimigo = GameObject.Find("Inimigo").transform;
     }
 
     void Update()
@@ -27,10 +37,6 @@ public class PersonagemAtv : MonoBehaviour
             Transform instanciado = Instantiate(projetil);
             instanciado.position = transform.position;
             instanciado.GetComponent<Projetil>().enabled = true;
-
-            Transform instancia = Instantiate(inimigo);
-            instancia.position = transform.position;
-            instancia.GetComponent<SpriteRenderer>().enabled = false;
 
             if (estaOlhandoDireita == true)
             {
@@ -59,7 +65,7 @@ public class PersonagemAtv : MonoBehaviour
 
         rigib.AddForce(new Vector2(move * velo, 0));
 
-        move = move * velo *Time.deltaTime;
+        move = move * velo * Time.deltaTime;
 
         bool pulo = Input.GetAxisRaw("Jump") > 0;
 
@@ -74,26 +80,36 @@ public class PersonagemAtv : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-
-        if (collision.gameObject.name.Contains("Inimigo") == true)
-        {
-            Destroy(collision.gameObject);
-            totalMoeda++;
-            Debug.Log("Moedas Coletadas: " + totalMoeda);
-        }
-
         if (collision.gameObject.name.Contains("Moeda") == true) 
         {
             Destroy(collision.gameObject);
             totalMoeda++;
-            Debug.Log("Moedas Coletadas: " + totalMoeda);
+            textoMoedas.text = "Moedas: <color=yellow>"+totalMoeda+"</color>";
         }
 
         if (collision.CompareTag("Morte"))
         {
             transform.position = posInicial;
             totalMoeda = 0;
-            Debug.Log("Você perdeu todas as moedas");
+            textoMoedas.text = "Moedas: <color=yellow>" + totalMoeda + "</color>";
+            vidas--;
+
+            if (vidas == 3)
+            {
+                textoVidas.text = "Vidas: <color=green>" + vidas + "</color>";
+            }
+            if (vidas == 2)
+            {
+                textoVidas.text = "Vidas: <color=yellow>" + vidas + "</color>";
+            }
+            if (vidas == 1)
+            {
+                textoVidas.text = "Vidas: <color=red>" + vidas + "</color>";
+            }
+            if (vidas <= 0)
+            {
+                textoVidas.text = "Vidas: <color=black>" + vidas + "</color>";
+            }
         }
 
         if (collision.CompareTag("Final"))

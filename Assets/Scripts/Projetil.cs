@@ -8,8 +8,9 @@ public class Projetil : MonoBehaviour
 
     void Start()
     {
-        Destroy(transform.gameObject, 3);     
+        Destroy(transform.gameObject, 0.7f);     
     }
+
     // Update is called once per frame
     void Update()
     {
@@ -18,6 +19,11 @@ public class Projetil : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D collision)
     {
-       Destroy(collision.gameObject);   
+        Destroy(transform.gameObject);
+
+        if (collision.gameObject.layer == Constraints.camadaInimigo)
+        {
+            Destroy(collision.gameObject);
+        }
     }
 }
