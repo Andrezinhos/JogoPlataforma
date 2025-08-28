@@ -6,8 +6,10 @@ public class PersonagemAtv : MonoBehaviour
     TextMeshProUGUI textoMoedas;
     TextMeshProUGUI textoVidas;
 
+    Animator anima;
+
     public float velo = 100;
-    float velomax = 5;
+    public float velomax = 5;
     public float forcaPulo = 10;
     int totalMoeda = 0;
     int vidas = 3;
@@ -23,6 +25,7 @@ public class PersonagemAtv : MonoBehaviour
     {
         posInicial = transform.position;
         rigib = GetComponent<Rigidbody2D>();
+        anima = transform.GetComponent<Animator>();
 
         textoMoedas = GameObject.Find("Text (TMP)").transform.GetComponent<TextMeshProUGUI>();
         textoVidas = GameObject.Find("Vidas").transform.GetComponent<TextMeshProUGUI>();
@@ -66,16 +69,25 @@ public class PersonagemAtv : MonoBehaviour
         rigib.AddForce(new Vector2(move * velo, 0));
 
         move = move * velo * Time.deltaTime;
-
-        bool pulo = Input.GetAxisRaw("Jump") > 0;
-
         rigib.linearVelocityX = Mathf.Clamp(rigib.linearVelocityX, -velomax, velomax);
 
+        if (rigib.linearVelocityX < 0.1f && rigib.linearVelocityX > -0.1f)
+        {
+            anima.SetBool("estaAndando", false);
+        }
+        else
+        {
+            anima.SetBool("estaAndando", true);
+        }
+
+        bool pulo = Input.GetAxisRaw("Jump") > 0;
         if (pulo == true && podePular == true)
         {
+            anima.SetBool("estaNoAr", true);
             rigib.AddForce(new Vector2(0, forcaPulo), ForceMode2D.Impulse);
             podePular = false;
         }
+
     }
 
     void OnTriggerEnter2D(Collider2D collision)
@@ -122,6 +134,7 @@ public class PersonagemAtv : MonoBehaviour
     {
         if (collision.gameObject.layer == Constraints.camadaChao)
         {
+            anima.SetBool("estaNoAr", false);
             podePular = true;
         }
     }
